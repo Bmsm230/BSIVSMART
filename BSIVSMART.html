@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BS IV SMART Pump</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #eef2f7;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            max-width: 1000px;
+            height: 700px;
+            border: 2px solid #d4d9df;
+            border-radius: 20px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            grid-column: span 2;
+            background-color: #007bff;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            padding: 15px 0;
+        }
+
+        /* Left Panel */
+        .left-panel {
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background-color: #f9fafc;
+            border-right: 2px solid #d4d9df;
+        }
+
+        .display {
+            border: 2px solid #e4e8ee;
+            border-radius: 15px;
+            padding: 20px;
+            background-color: #ffffff;
+            height: 350px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            position: relative;
+        }
+
+        .display-title {
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            color: #333333;
+        }
+
+        .display-info {
+            font-size: 16px;
+            color: #555555;
+            padding: 5px 0;
+        }
+
+        .secondary-button {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .secondary-button:hover {
+            background-color: #0056b3;
+        }
+
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .keypad button {
+            font-size: 18px;
+            padding: 15px;
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .keypad button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Right Panel */
+        .right-panel {
+            background-color: #f1f3f6;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px 20px;
+        }
+
+        .button {
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 15px;
+            margin: 10px 0;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+        }
+
+        .button:hover {
+            background-color: #0056b3;
+        }
+
+        .silence-button {
+            background-color: orange;
+        }
+
+        /* Popups */
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 25px;
+            border: 2px solid #ccc;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        .popup.active {
+            display: block;
+        }
+
+        .popup h3 {
+            margin-top: 0;
+            color: #333333;
+        }
+
+        .popup select,
+        .popup input {
+            width: 80%;
+            margin: 10px 0;
+            padding: 10px;
+            font-size: 16px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .popup button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .popup button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">BS IV SMART</div>
+
+        <!-- Left Panel -->
+        <div class="left-panel">
+            <div class="display" id="display">
+                <div class="display-title">Channel: None</div>
+                <div class="display-info">Primary Medication: --</div>
+                <div class="display-info">Primary Rate: --</div>
+                <div class="display-info">Primary VTBI: --</div>
+                <div class="display-info">Primary Time: --</div>
+                <div class="display-info">Secondary Medication: --</div>
+                <div class="display-info">Secondary Rate: --</div>
+                <div class="display-info">Secondary VTBI: --</div>
+                <div class="display-info">Secondary Time: --</div>
+                <!-- Secondary Button -->
+                <button class="secondary-button" style="display:none;" id="secondary-button" onclick="openSecondaryPopup()">Secondary</button>
+            </div>
+            <div class="keypad">
+                <button>1</button>
+                <button>2</button>
+                <button>3</button>
+                <button>4</button>
+                <button>5</button>
+                <button>6</button>
+                <button>7</button>
+                <button>8</button>
+                <button>9</button>
+                <button>*</button>
+                <button>0</button>
+                <button>#</button>
+            </div>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="right-panel">
+            <button class="button" onclick="openChannelPopup()">Channel Select</button>
+            <button class="button" onclick="pauseInfusion()">Pause</button>
+            <button class="button silence-button" onclick="silence()">Silence</button>
+            <button class="button" onclick="restartSimulation()">Restart</button>
+            <button class="button" onclick="channelOff()">Channel Off</button>
+        </div>
+    </div>
+
+    <!-- Popups -->
+    <div class="popup" id="channel-popup">
+        <h3>Select a Channel</h3>
+        <button onclick="selectChannel('A')">Channel A</button>
+        <button onclick="selectChannel('B')">Channel B</button>
+        <button onclick="selectChannel('C')">Channel C</button>
+        <button onclick="closePopup('channel-popup')">Close</button>
+    </div>
+
+    <div class="popup" id="infusion-popup">
+        <h3>Set Primary Infusion</h3>
+        <select id="medication-select"></select>
+        <input type="number" id="rate-input" placeholder="Flow Rate (mL/h)">
+        <input type="number" id="vtbi-input" placeholder="VTBI (mL)">
+        <input type="number" id="time-input" placeholder="Time (hours)">
+        <button onclick="confirmPrimaryInfusion()">Confirm</button>
+    </div>
+
+    <div class="popup" id="secondary-popup">
+        <h3>Set Secondary Infusion</h3>
+        <select id="secondary-medication-select"></select>
+        <input type="number" id="secondary-rate-input" placeholder="Flow Rate (mL/h)">
+        <input type="number" id="secondary-vtbi-input" placeholder="VTBI (mL)">
+        <input type="number" id="secondary-time-input" placeholder="Time (hours)">
+        <button onclick="confirmSecondaryInfusion()">Confirm</button>
+    </div>
+
+    <script>
+        const medications = [
+            "Normal Saline 9%", "D5 0.50% normal saline", "5% Dextrose in Lactated Ringer's",
+            "Lactated Ringer's", "Piperacillin + Tazobactam", "Vancomycin",
+            "Metronidazole (Flagyl)", "Cefazolin (Ancef)", "Ceftriaxone (Rocephin)", 
+            "Cefepime (Maxipime)", "Potassium Chloride (KCl)", "Magnesium Sulfate",
+            "Levofloxacin (Levaquin)", "Propofol (Diprivan)", "Midazolam (Versed)", 
+            "Insulin (Regular)", "Heparin"
+        ];
+
+        let currentChannel = null;
+        let infusions = {};
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const medSelect = document.getElementById("medication-select");
+            const secMedSelect = document.getElementById("secondary-medication-select");
+            medications.forEach(med => {
+                const option = document.createElement("option");
+                option.value = med;
+                option.textContent = med;
+                medSelect.appendChild(option);
+
+                const secOption = option.cloneNode(true);
+                secMedSelect.appendChild(secOption);
+            });
+        });
+
+        function openChannelPopup() {
+            document.getElementById('channel-popup').classList.add('active');
+        }
+
+        function closePopup(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        function selectChannel(channel) {
+            currentChannel = channel;
+            document.querySelector('.display-title').textContent = `Channel: ${channel}`;
+            closePopup('channel-popup');
+            openInfusionPopup();
+        }
+
+        function openInfusionPopup() {
+            document.getElementById('infusion-popup').classList.add('active');
+        }
+
+        function confirmPrimaryInfusion() {
+            const medication = document.getElementById('medication-select').value;
+            const rate = document.getElementById('rate-input').value;
+            const vtbi = document.getElementById('vtbi-input').value;
+            const time = document.getElementById('time-input').value;
+
+            if (!infusions[currentChannel]) infusions[currentChannel] = {};
+            infusions[currentChannel].primary = { medication, rate, vtbi, time };
+            updateDisplay();
+            closePopup('infusion-popup');
+        }
+
+        function openSecondaryPopup() {
+            if (!infusions[currentChannel]?.primary) {
+                alert("Set a primary infusion first.");
+                return;
+            }
+            document.getElementById('secondary-popup').classList.add('active');
+        }
+
+        function confirmSecondaryInfusion() {
+            const medication = document.getElementById('secondary-medication-select').value;
+            const rate = document.getElementById('secondary-rate-input').value;
+            const vtbi = document.getElementById('secondary-vtbi-input').value;
+            const time = document.getElementById('secondary-time-input').value;
+
+            if (!infusions[currentChannel]) return;
+            infusions[currentChannel].secondary = { medication, rate, vtbi, time };
+            updateDisplay();
+            closePopup('secondary-popup');
+        }
+
+        function updateDisplay() {
+            const channelInfusion = infusions[currentChannel];
+            const primary = channelInfusion?.primary || {};
+            const secondary = channelInfusion?.secondary || {};
+
+            document.querySelector('.display-info:nth-child(2)').textContent = `Primary Medication: ${primary.medication || '--'}`;
+            document.querySelector('.display-info:nth-child(3)').textContent = `Primary Rate: ${primary.rate || '--'} mL/hr`;
+            document.querySelector('.display-info:nth-child(4)').textContent = `Primary VTBI: ${primary.vtbi || '--'} mL`;
+            document.querySelector('.display-info:nth-child(5)').textContent = `Primary Time: ${primary.time || '--'} hours`;
+            document.querySelector('.display-info:nth-child(6)').textContent = `Secondary Medication: ${secondary.medication || '--'}`;
+            document.querySelector('.display-info:nth-child(7)').textContent = `Secondary Rate: ${secondary.rate || '--'} mL/hr`;
+            document.querySelector('.display-info:nth-child(8)').textContent = `Secondary VTBI: ${secondary.vtbi || '--'} mL`;
+            document.querySelector('.display-info:nth-child(9)').textContent = `Secondary Time: ${secondary.time || '--'} hours`;
+
+            // Toggle visibility of the secondary button
+            const secondaryButton = document.getElementById('secondary-button');
+            if (primary.medication) {
+                secondaryButton.style.display = "block";
+            } else {
+                secondaryButton.style.display = "none";
+            }
+        }
+
+        function restartSimulation() {
+            // Clear infusion data
+            infusions = {};
+            currentChannel = null;
+
+            // Reset display
+            const displayInfos = document.querySelectorAll('.display-info');
+            document.querySelector('.display-title').textContent = 'Channel: None';
+            displayInfos.forEach(info => {
+                info.textContent = '--';
+            });
+
+            // Hide the secondary button
+            document.getElementById('secondary-button').style.display = "none";
+
+            alert("Simulation restarted. Ready for new programming.");
+        }
+    </script>
+</body>
+</html>
